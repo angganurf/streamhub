@@ -1,27 +1,82 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
+
+export interface SidebarCategoryResult {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface MegaMenuCategoryResult {
+  id: string;
+  name: string;
+  slug: string;
+  _count: {
+    videos: number;
+  };
+  videos: {
+    thumbnailUrl: string | null;
+  }[];
+}
+
+export interface VideoCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface IdSelectResult {
+  id: string;
+}
+
+export interface Video {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  categoryId: string | null;
+  thumbnailUrl: string | null;
+  thumbnailKey: string | null;
+  videoUrl: string | null;
+  videoKey: string | null;
+  mimeType: string | null;
+  fileSize: number | null;
+  duration: number | null;
+  status: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  visibility: "PUBLIC" | "PRIVATE";
+  views: number;
+  isFeatured: boolean;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export async function getSidebarCategories() {
   try {
-    const categories = await prisma.videoCategory.findMany({
+    const categories = (await prisma.videoCategory.findMany({
       orderBy: { name: "asc" },
       select: {
         id: true,
         name: true,
         slug: true,
       },
-    });
+    })) as SidebarCategoryResult[];
     return { success: true, categories };
   } catch (error) {
     console.error("Failed to fetch sidebar categories:", error);
-    return { success: false, categories: [] };
+    return { success: false, categories: [] as SidebarCategoryResult[] };
   }
 }
 
 export async function getMegaMenuCategories() {
   try {
-    const categories = await prisma.videoCategory.findMany({
+    const categories = (await prisma.videoCategory.findMany({
       orderBy: {
         videos: {
           _count: 'desc'
@@ -41,7 +96,7 @@ export async function getMegaMenuCategories() {
           select: { thumbnailUrl: true }
         }
       }
-    });
+    })) as MegaMenuCategoryResult[];
 
     const formattedCategories = categories.map(cat => ({
       id: cat.id,
@@ -81,26 +136,26 @@ export async function getCategoryPageData({
 }: GetCategoryPageDataParams) {
   try {
     // 1. Fetch current category details
-    const currentCategory = await prisma.videoCategory.findUnique({
+    const currentCategory = (await prisma.videoCategory.findUnique({
       where: { slug },
-    });
+    })) as VideoCategory | null;
 
     if (!currentCategory) {
       return { success: false, error: "Category not found" };
     }
 
     // 2. Fetch all categories (to populate include/exclude selectors)
-    const allCategories = await prisma.videoCategory.findMany({
+    const allCategories = (await prisma.videoCategory.findMany({
       orderBy: { name: "asc" },
       select: {
         id: true,
         name: true,
         slug: true,
       }
-    });
+    })) as SidebarCategoryResult[];
 
     // 3. Build query filter conditions
-    const where: any = {
+    const where: Prisma.VideoWhereInput = {
       status: "PUBLISHED",
       visibility: "PUBLIC",
     };
@@ -110,10 +165,10 @@ export async function getCategoryPageData({
     if (include) {
       const includeSlugs = include.split(",").filter(Boolean);
       if (includeSlugs.length > 0) {
-        const includedCats = await prisma.videoCategory.findMany({
+        const includedCats = (await prisma.videoCategory.findMany({
           where: { slug: { in: includeSlugs } },
           select: { id: true }
-        });
+        })) as IdSelectResult[];
         const includedIds = includedCats.map(c => c.id);
         categoryIds = Array.from(new Set([...categoryIds, ...includedIds]));
       }
@@ -124,10 +179,10 @@ export async function getCategoryPageData({
     if (exclude) {
       const excludeSlugs = exclude.split(",").filter(Boolean);
       if (excludeSlugs.length > 0) {
-        const excludedCats = await prisma.videoCategory.findMany({
+        const excludedCats = (await prisma.videoCategory.findMany({
           where: { slug: { in: excludeSlugs } },
           select: { id: true }
-        });
+        })) as IdSelectResult[];
         excludeIds = excludedCats.map(c => c.id);
       }
     }
@@ -174,7 +229,7 @@ export async function getCategoryPageData({
     }
 
     // 4. Determine ordering
-    let orderBy: any = { createdAt: "desc" };
+    let orderBy: Prisma.VideoOrderByWithRelationInput | Prisma.VideoOrderByWithRelationInput[] = { createdAt: "desc" };
     if (sort === "views") {
       orderBy = { views: "desc" };
     } else if (sort === "rated" || sort === "hottest") {
@@ -199,12 +254,12 @@ export async function getCategoryPageData({
     const take = limit;
 
     const [videos, totalCount] = await Promise.all([
-      prisma.video.findMany({
+      (await prisma.video.findMany({
         where,
         orderBy,
         skip,
         take,
-      }),
+      })) as Video[],
       prisma.video.count({
         where,
       })
