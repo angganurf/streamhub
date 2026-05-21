@@ -9,11 +9,30 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { createVideoAction } from "../actions";
+import { getSidebarCategories } from "@/actions/categories";
+import { useEffect } from "react";
 
 export default function AdminUploadVideoPage() {
   const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [title, setTitle] = useState("");
+  const [slug, setSlug] = useState("");
+  const [categories, setCategories] = useState<{id: string, name: string}[]>([]);
+
+  useEffect(() => {
+    getSidebarCategories().then(res => {
+      if (res.success) {
+        setCategories(res.categories);
+      }
+    });
+  }, []);
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTitle = e.target.value;
+    setTitle(newTitle);
+    setSlug(newTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''));
+  };
 
   const uploadFileToR2 = async (file: File) => {
     // 1. Get Presigned URL
@@ -72,15 +91,15 @@ export default function AdminUploadVideoPage() {
       setUploadProgress(0); // reset progress for video
       const videoResult = await uploadFileToR2(videoFile);
 
-      // Save to database
       const result = await createVideoAction({
         title: formData.get("title") as string,
         slug: formData.get("slug") as string,
         description: formData.get("description") as string,
+        categoryId: formData.get("categoryId") as string,
         status: formData.get("status") as "DRAFT" | "PUBLISHED",
         visibility: formData.get("public") === "on" ? "PUBLIC" : "PRIVATE",
-        seoTitle: formData.get("seoTitle") as string,
-        seoDescription: formData.get("seoDesc") as string,
+        seoTitle: formData.get("title") as string, // Auto map title to seoTitle
+        seoDescription: formData.get("description") as string, // Auto map description to seoDescription
         videoKey: videoResult.key,
         thumbnailKey: thumbResult.key,
         isFeatured: formData.get("isFeatured") === "on",
@@ -138,12 +157,12 @@ export default function AdminUploadVideoPage() {
           <CardContent className="grid gap-4">
             <div className="grid gap-2">
               <label htmlFor="title" className="text-sm font-medium">Title</label>
-              <Input id="title" name="title" placeholder="Video Title" required />
+              <Input id="title" name="title" placeholder="Video Title" value={title} onChange={handleTitleChange} required />
             </div>
             
             <div className="grid gap-2">
               <label htmlFor="slug" className="text-sm font-medium">Slug (URL)</label>
-              <Input id="slug" name="slug" placeholder="video-title" required />
+              <Input id="slug" name="slug" placeholder="video-title" value={slug} onChange={(e) => setSlug(e.target.value)} required />
             </div>
             
             <div className="grid gap-2">
@@ -152,6 +171,21 @@ export default function AdminUploadVideoPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <label className="text-sm font-medium">Category</label>
+                <Select name="categoryId" defaultValue="none">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No Category</SelectItem>
+                    {categories.map(cat => (
+                      <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="grid gap-2">
                 <label className="text-sm font-medium">Status</label>
                 <Select defaultValue="PUBLISHED" name="status">
@@ -178,21 +212,6 @@ export default function AdminUploadVideoPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>SEO Meta</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <div className="grid gap-2">
-              <label htmlFor="seoTitle" className="text-sm font-medium">SEO Title</label>
-              <Input id="seoTitle" name="seoTitle" placeholder="Custom SEO Title" />
-            </div>
-            <div className="grid gap-2">
-              <label htmlFor="seoDesc" className="text-sm font-medium">SEO Description</label>
-              <Textarea id="seoDesc" name="seoDesc" placeholder="Meta description for search engines..." rows={3} />
-            </div>
-          </CardContent>
-        </Card>
 
         <div className="flex justify-end gap-4 mb-10">
           <Button variant="outline" type="button" onClick={() => router.back()}>Cancel</Button>
