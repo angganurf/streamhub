@@ -99,7 +99,7 @@ export function EditAdForm({ ad }: { ad: Ad }) {
 
             <div className="grid gap-2">
               <label className="text-sm font-medium">Type</label>
-              <Select value={adType} onValueChange={setAdType}>
+              <Select value={adType} onValueChange={(val) => { if (val) setAdType(val) }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {AD_TYPES.map((t) => <SelectItem key={t} value={t}>{t.replace('_', ' ')}</SelectItem>)}
@@ -170,7 +170,7 @@ export function EditAdForm({ ad }: { ad: Ad }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="grid gap-2">
                     <label className="text-sm font-medium">Banner Size</label>
-                    <Select value={bannerSize} onValueChange={setBannerSize}>
+                    <Select value={bannerSize} onValueChange={(val) => { if (val) setBannerSize(val) }}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {BANNER_SIZES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
