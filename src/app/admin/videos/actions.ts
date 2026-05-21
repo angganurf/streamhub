@@ -121,9 +121,6 @@ export async function deleteVideoAction(id: string) {
     }
 
     // Delete related records first
-    await prisma.adImpression.deleteMany({ where: { videoId: id } });
-    await prisma.adClick.deleteMany({ where: { videoId: id } });
-
     await prisma.video.delete({ where: { id } });
 
     revalidatePath("/");
