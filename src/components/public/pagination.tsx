@@ -19,22 +19,22 @@ export function Pagination({ totalPages }: PaginationProps) {
     return `${pathname}?${params.toString()}`;
   };
 
-  if (totalPages <= 1) return null;
+  const safeTotalPages = Math.max(1, totalPages);
 
   // Logic to build pagination array (like 1, 2, 3, 4, 5, ..., 10)
   const getPages = () => {
     const pages = [];
-    if (totalPages <= 7) {
-      for (let i = 1; i <= totalPages; i++) {
+    if (safeTotalPages <= 7) {
+      for (let i = 1; i <= safeTotalPages; i++) {
         pages.push(i);
       }
     } else {
       if (currentPage <= 4) {
-        pages.push(1, 2, 3, 4, 5, '...', totalPages);
-      } else if (currentPage >= totalPages - 3) {
-        pages.push(1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+        pages.push(1, 2, 3, 4, 5, '...', safeTotalPages);
+      } else if (currentPage >= safeTotalPages - 3) {
+        pages.push(1, '...', safeTotalPages - 4, safeTotalPages - 3, safeTotalPages - 2, safeTotalPages - 1, safeTotalPages);
       } else {
-        pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+        pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', safeTotalPages);
       }
     }
     return pages;
@@ -83,7 +83,7 @@ export function Pagination({ totalPages }: PaginationProps) {
       })}
 
       {/* Next Button */}
-      {currentPage >= totalPages ? (
+      {currentPage >= safeTotalPages ? (
         <div className="h-10 px-4 flex items-center justify-center bg-[#ffa31a]/50 text-black/50 text-sm font-bold opacity-50 cursor-not-allowed">
           Next
         </div>

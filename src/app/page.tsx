@@ -15,7 +15,7 @@ export default async function Home(
 ) {
   const searchParams = await props.searchParams;
   const page = parseInt((searchParams?.page as string) || "1", 10);
-  const limit = 34; // exactly 34 videos as requested
+  const limit = 16;
   const skip = (page - 1) * limit;
 
   // Run count and fetch in parallel
