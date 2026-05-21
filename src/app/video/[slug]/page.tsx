@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/public/header";
 import { VideoPlayer } from "@/components/public/video-player";
 import { AdBanner } from "@/components/ads/AdBanner";
-import { PopunderScriptRenderer } from "@/components/ads/PopunderScriptRenderer";
 import { Button } from "@/components/ui/button";
 import { ThumbsUp, ThumbsDown, Plus, Flag } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -49,7 +48,6 @@ export default async function VideoDetailPage({ params }: { params: Promise<{ sl
   return (
     <>
       <Header />
-      <PopunderScriptRenderer />
       
       <main className="container mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6">
         <div className="flex-1 min-w-0">

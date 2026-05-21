@@ -39,12 +39,7 @@ export function GlobalAdsRenderer() {
         script.src = srcMatch[1];
         script.async = true;
         script.onload = () => {
-          // Track impression once loaded
-          fetch('/api/ads/impression', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ adId, placement })
-          }).catch(console.error);
+          // Script loaded
         };
         
         if (target === "head") {

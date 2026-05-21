@@ -113,8 +113,6 @@ export async function deleteAdAction(id: string) {
       console.error("Failed to delete R2 objects:", e);
     }
 
-    await prisma.adImpression.deleteMany({ where: { adId: id } });
-    await prisma.adClick.deleteMany({ where: { adId: id } });
     await prisma.ad.delete({ where: { id } });
 
     revalidatePath("/admin/ads");

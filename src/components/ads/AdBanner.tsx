@@ -21,13 +21,6 @@ export function AdBanner({ placement }: AdBannerProps) {
           const data = await res.json();
           if (mounted && data.ad) {
             setAd(data.ad);
-            
-            // Track impression
-            await fetch('/api/ads/impression', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ adId: data.ad.id, placement })
-            });
           }
         }
       } catch (error) {

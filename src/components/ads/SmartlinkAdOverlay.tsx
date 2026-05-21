@@ -46,17 +46,6 @@ export function SmartlinkAdOverlay({ onDismiss, posterUrl }: SmartlinkAdOverlayP
   const handleClick = async () => {
     if (!ad) return;
 
-    // Track click
-    try {
-      await fetch('/api/ads/click', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ adId: ad.id, placement: 'VIDEO_BEFORE_PLAYER' })
-      });
-    } catch (e) {
-      console.error(e);
-    }
-
     // Open link in new tab
     if (ad.targetUrl) {
       window.open(ad.targetUrl, "_blank", "noopener,noreferrer");
@@ -77,15 +66,6 @@ export function SmartlinkAdOverlay({ onDismiss, posterUrl }: SmartlinkAdOverlayP
   if (!ad) {
     return null; // Should have already called onDismiss
   }
-
-  // Impression tracking
-  useEffect(() => {
-    fetch('/api/ads/impression', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ adId: ad.id, placement: 'VIDEO_BEFORE_PLAYER' })
-    }).catch(console.error);
-  }, [ad.id]);
 
   return (
     <div 

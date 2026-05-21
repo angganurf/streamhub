@@ -22,7 +22,7 @@ export default async function AdminDashboard() {
   });
 
   const adPerformance = await prisma.ad.findMany({
-    orderBy: { impressions: "desc" },
+    orderBy: { createdAt: "desc" },
     take: 5,
   });
 
@@ -115,10 +115,6 @@ export default async function AdminDashboard() {
                   <div className="flex justify-between text-sm">
                     <span className="font-medium">{ad.name}</span>
                     <span className="text-muted-foreground">{ad.status}</span>
-                  </div>
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>{ad.impressions} Impr.</span>
-                    <span>{ad.clicks} Clicks</span>
                   </div>
                 </div>
               ))}

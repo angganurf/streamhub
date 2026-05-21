@@ -124,8 +124,6 @@ model Video {
   
   tags           VideoTag[]      @relation("VideoToVideoTag")
   ads            Ad[]            @relation("AdToVideo")
-  impressions    AdImpression[]
-  clicks         AdClick[]
 
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
@@ -221,14 +219,8 @@ model Ad {
   startAt      DateTime?
   endAt        DateTime?
   
-  // Analytics
-  impressions  Int         @default(0)
-  clicks       Int         @default(0)
-  
   // Relations
   videos       Video[]     @relation("AdToVideo")
-  impressionLogs AdImpression[]
-  clickLogs      AdClick[]
 
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
@@ -236,32 +228,3 @@ model Ad {
   @@map("ads")
 }
 
-model AdImpression {
-  id          String      @id @default(cuid())
-  adId        String
-  ad          Ad          @relation(fields: [adId], references: [id])
-  videoId     String?
-  video       Video?      @relation(fields: [videoId], references: [id])
-  placement   AdPlacement
-  userAgent   String?
-  ipHash      String?
-  
-  createdAt   DateTime    @default(now())
-
-  @@map("ad_impressions")
-}
-
-model AdClick {
-  id          String      @id @default(cuid())
-  adId        String
-  ad          Ad          @relation(fields: [adId], references: [id])
-  videoId     String?
-  video       Video?      @relation(fields: [videoId], references: [id])
-  placement   AdPlacement
-  userAgent   String?
-  ipHash      String?
-  
-  createdAt   DateTime    @default(now())
-
-  @@map("ad_clicks")
-}

@@ -14,9 +14,7 @@ interface Ad {
   type: string;
   provider: string;
   placement: string;
-  status: string;
-  impressions: number;
-  clicks: number;
+  status: "ACTIVE" | "INACTIVE";
 }
 
 export default function AdminAdsPage() {
@@ -88,7 +86,6 @@ export default function AdminAdsPage() {
               <TableHead>Type</TableHead>
               <TableHead>Placement</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Metrics</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -107,12 +104,6 @@ export default function AdminAdsPage() {
                   <Badge variant={ad.status === "ACTIVE" ? "default" : "secondary"}>
                     {ad.status}
                   </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="text-sm">
-                    <div>{ad.impressions} Impr.</div>
-                    <div className="text-muted-foreground">{ad.clicks} Clicks</div>
-                  </div>
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-1">
