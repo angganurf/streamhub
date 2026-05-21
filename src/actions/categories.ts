@@ -1,7 +1,6 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
 
 export interface SidebarCategoryResult {
   id: string;
@@ -55,6 +54,15 @@ export interface Video {
   seoDescription: string | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface VideoQueryFilters {
+  status?: "DRAFT" | "PUBLISHED" | "ARCHIVED";
+  visibility?: "PUBLIC" | "PRIVATE";
+  categoryId?: { in: string[] } | string | null;
+  duration?: { gte: number; lte?: number } | number;
+  OR?: Array<Record<string, unknown>>;
+  NOT?: Array<Record<string, unknown>>;
 }
 
 export async function getSidebarCategories() {
@@ -155,7 +163,7 @@ export async function getCategoryPageData({
     })) as SidebarCategoryResult[];
 
     // 3. Build query filter conditions
-    const where: Prisma.VideoWhereInput = {
+    const where: VideoQueryFilters = {
       status: "PUBLISHED",
       visibility: "PUBLIC",
     };
@@ -229,7 +237,7 @@ export async function getCategoryPageData({
     }
 
     // 4. Determine ordering
-    let orderBy: Prisma.VideoOrderByWithRelationInput | Prisma.VideoOrderByWithRelationInput[] = { createdAt: "desc" };
+    let orderBy: Record<string, "asc" | "desc"> | Array<Record<string, "asc" | "desc">> = { createdAt: "desc" };
     if (sort === "views") {
       orderBy = { views: "desc" };
     } else if (sort === "rated" || sort === "hottest") {
@@ -255,13 +263,13 @@ export async function getCategoryPageData({
 
     const [videos, totalCount] = await Promise.all([
       (await prisma.video.findMany({
-        where,
-        orderBy,
+        where: where as NonNullable<Parameters<typeof prisma.video.findMany>[0]>["where"],
+        orderBy: orderBy as NonNullable<Parameters<typeof prisma.video.findMany>[0]>["orderBy"],
         skip,
         take,
       })) as Video[],
       prisma.video.count({
-        where,
+        where: where as NonNullable<Parameters<typeof prisma.video.findMany>[0]>["where"],
       })
     ]);
 
@@ -290,4 +298,3 @@ export async function getCategoryPageData({
     return { success: false, error: "Database error" };
   }
 }
-
