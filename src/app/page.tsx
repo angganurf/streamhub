@@ -1,17 +1,36 @@
 import { Header } from "@/components/public/header";
 import { CategoryPills } from "@/components/public/category-pills";
 import { VideoGrid } from "@/components/public/video-grid";
+import { Pagination } from "@/components/public/pagination";
 import { prisma } from "@/lib/prisma";
 import { Globe } from "lucide-react";
 
 export const revalidate = 60;
 
-export default async function Home() {
-  const videos = await prisma.video.findMany({
-    where: { status: "PUBLISHED", visibility: "PUBLIC" },
-    orderBy: { createdAt: "desc" },
-    take: 24,
-  });
+export default async function Home(
+  props: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+  }
+) {
+  const searchParams = await props.searchParams;
+  const page = parseInt((searchParams?.page as string) || "1", 10);
+  const limit = 34; // exactly 34 videos as requested
+  const skip = (page - 1) * limit;
+
+  // Run count and fetch in parallel
+  const [videos, totalCount] = await Promise.all([
+    prisma.video.findMany({
+      where: { status: "PUBLISHED", visibility: "PUBLIC" },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.video.count({
+      where: { status: "PUBLISHED", visibility: "PUBLIC" },
+    })
+  ]);
+
+  const totalPages = Math.ceil(totalCount / limit);
 
   const formattedVideos = videos.map(v => ({
     id: v.id,
@@ -44,7 +63,10 @@ export default async function Home() {
         {/* Video Grid */}
         <div className="mt-4">
           {formattedVideos.length > 0 ? (
-            <VideoGrid videos={formattedVideos} />
+            <>
+              <VideoGrid videos={formattedVideos} />
+              <Pagination totalPages={totalPages} />
+            </>
           ) : (
             <div className="flex flex-col items-center justify-center py-20 text-gray-500">
               <p className="text-xl font-bold">No videos found</p>
