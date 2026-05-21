@@ -2,14 +2,18 @@ import { Header } from "@/components/public/header";
 import { CategoryPills } from "@/components/public/category-pills";
 import { VideoGrid } from "@/components/public/video-grid";
 import { prisma } from "@/lib/prisma";
-import { Globe } from "lucide-react";
+import { ThumbsUp } from "lucide-react";
 
 export const revalidate = 60;
 
-export default async function Home() {
+export default async function RecommendedPage() {
+  // Simple recommendation algorithm: order by most views
   const videos = await prisma.video.findMany({
-    where: { status: "PUBLISHED", visibility: "PUBLIC" },
-    orderBy: { createdAt: "desc" },
+    where: { 
+      status: "PUBLISHED", 
+      visibility: "PUBLIC" 
+    },
+    orderBy: { views: "desc" },
     take: 24,
   });
 
@@ -28,20 +32,17 @@ export default async function Home() {
     <div className="min-h-screen bg-black text-white font-sans flex flex-col">
       <Header />
       <main className="flex-1 flex flex-col w-full max-w-[1600px] mx-auto">
-        {/* Page Title */}
         <div className="flex items-center gap-2 px-4 md:px-6 pt-6 pb-2">
           <h1 className="text-xl font-bold tracking-tight text-white">
-            Trending videos Internationally
+            Recommended Videos
           </h1>
-          <Globe className="h-5 w-5 text-[#2b82d9]" />
+          <ThumbsUp className="h-5 w-5 text-[#ffa31a]" />
         </div>
 
-        {/* Categories / Tags */}
         <div className="px-4 md:px-6">
           <CategoryPills />
         </div>
 
-        {/* Video Grid */}
         <div className="mt-4">
           {formattedVideos.length > 0 ? (
             <VideoGrid videos={formattedVideos} />

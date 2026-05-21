@@ -1,0 +1,263 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── BetterAuth Models ───
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  role          String    @default("user")
+  banned        Boolean?
+  banReason     String?
+  banExpires    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("users_auth")
+}
+
+model Session {
+  id            String   @id
+  expiresAt     DateTime
+  token         String   @unique
+  ipAddress     String?
+  userAgent     String?
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("sessions")
+}
+
+model Account {
+  id            String   @id
+  accountId     String
+  providerId    String
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken   String?
+  refreshToken  String?
+  idToken       String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope         String?
+  password      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("accounts")
+}
+
+model Verification {
+  id            String   @id
+  identifier    String
+  value         String
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("verifications")
+}
+
+// ─── Site Settings ───
+
+model SiteSettings {
+  key       String   @id
+  value     String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+// ─── Video Models ───
+
+enum VideoStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum VideoVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+model Video {
+  id             String          @id @default(cuid())
+  title          String
+  slug           String          @unique
+  description    String?         @db.Text
+  categoryId     String?
+  category       VideoCategory?  @relation(fields: [categoryId], references: [id])
+  
+  thumbnailUrl   String?
+  thumbnailKey   String?
+  videoUrl       String?
+  videoKey       String?
+  mimeType       String?
+  fileSize       Int?
+  duration       Int?            // Duration in seconds
+  
+  status         VideoStatus     @default(DRAFT)
+  visibility     VideoVisibility @default(PRIVATE)
+  views          Int             @default(0)
+  isFeatured     Boolean         @default(false)
+  
+  seoTitle       String?
+  seoDescription String?         @db.Text
+  
+  tags           VideoTag[]      @relation("VideoToVideoTag")
+  ads            Ad[]            @relation("AdToVideo")
+  impressions    AdImpression[]
+  clicks         AdClick[]
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@map("videos")
+}
+
+model VideoCategory {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  videos      Video[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("video_categories")
+}
+
+model VideoTag {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  videos    Video[]  @relation("VideoToVideoTag")
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("video_tags")
+}
+
+// ─── Ads Models ───
+
+enum AdType {
+  VIDEO_PREROLL
+  VIDEO_MIDROLL
+  VIDEO_POSTROLL
+  BANNER
+  POPUNDER_SCRIPT
+  CUSTOM_SCRIPT
+}
+
+enum AdProvider {
+  DIRECT
+  ADSTERRA
+  CUSTOM
+}
+
+enum AdPlacement {
+  HOME_TOP
+  HOME_MIDDLE
+  HOME_SIDEBAR
+  VIDEO_BEFORE_PLAYER
+  VIDEO_AFTER_PLAYER
+  VIDEO_SIDEBAR
+  VIDEO_PREROLL
+  GLOBAL_HEAD
+  GLOBAL_BODY
+  POPUNDER
+}
+
+enum AdStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Ad {
+  id           String      @id @default(cuid())
+  name         String
+  type         AdType
+  provider     AdProvider  @default(DIRECT)
+  placement    AdPlacement
+  status       AdStatus    @default(INACTIVE)
+  
+  title        String?
+  targetUrl    String?
+  
+  // Banner / Media
+  imageUrl     String?
+  imageKey     String?
+  videoUrl     String?
+  videoKey     String?
+  
+  // Script / Popunder
+  scriptCode   String?     @db.Text
+  
+  // Scheduling
+  startAt      DateTime?
+  endAt        DateTime?
+  
+  // Analytics
+  impressions  Int         @default(0)
+  clicks       Int         @default(0)
+  
+  // Relations
+  videos       Video[]     @relation("AdToVideo")
+  impressionLogs AdImpression[]
+  clickLogs      AdClick[]
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@map("ads")
+}
+
+model AdImpression {
+  id          String      @id @default(cuid())
+  adId        String
+  ad          Ad          @relation(fields: [adId], references: [id])
+  videoId     String?
+  video       Video?      @relation(fields: [videoId], references: [id])
+  placement   AdPlacement
+  userAgent   String?
+  ipHash      String?
+  
+  createdAt   DateTime    @default(now())
+
+  @@map("ad_impressions")
+}
+
+model AdClick {
+  id          String      @id @default(cuid())
+  adId        String
+  ad          Ad          @relation(fields: [adId], references: [id])
+  videoId     String?
+  video       Video?      @relation(fields: [videoId], references: [id])
+  placement   AdPlacement
+  userAgent   String?
+  ipHash      String?
+  
+  createdAt   DateTime    @default(now())
+
+  @@map("ad_clicks")
+}
