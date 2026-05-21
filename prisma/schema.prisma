@@ -168,6 +168,7 @@ enum AdType {
   SMARTLINK
   POPUNDER
   SOCIAL_BAR
+  NATIVE_BANNER
 }
 
 enum AdProvider {
@@ -187,6 +188,7 @@ enum AdPlacement {
   GLOBAL_HEAD
   GLOBAL_BODY
   POPUNDER
+  HOME_GRID
 }
 
 enum AdStatus {
@@ -211,6 +213,7 @@ model Ad {
   videoUrl     String?
   videoKey     String?
   bannerSize   String?
+  gridPosition Int?
   
   // Script / Popunder
   scriptCode   String?     @db.Text

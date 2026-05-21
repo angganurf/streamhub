@@ -17,6 +17,7 @@ export async function createAdAction(data: {
   imageUrl?: string;
   scriptCode?: string;
   bannerSize?: string;
+  gridPosition?: number;
 }) {
   try {
     const { publicUrl } = await getR2Config();
@@ -35,6 +36,7 @@ export async function createAdAction(data: {
         imageUrl: data.imageUrl || imageUrl || null,
         scriptCode: data.scriptCode || null,
         bannerSize: data.bannerSize || null,
+        gridPosition: data.gridPosition || null,
       },
     });
 
@@ -60,6 +62,7 @@ export async function updateAdAction(
     imageUrl?: string;
     scriptCode?: string;
     bannerSize?: string;
+    gridPosition?: number;
   }
 ) {
   try {
@@ -73,6 +76,7 @@ export async function updateAdAction(
       targetUrl: data.targetUrl || null,
       scriptCode: data.scriptCode || null,
       bannerSize: data.bannerSize || null,
+      gridPosition: data.gridPosition || null,
     };
 
     if (data.imageUrl) {

@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { createAdAction } from "../actions";
 import { Loader2 } from "lucide-react";
 
-const AD_TYPES = ["SMARTLINK", "POPUNDER", "SOCIAL_BAR", "BANNER"];
+const AD_TYPES = ["SMARTLINK", "POPUNDER", "SOCIAL_BAR", "BANNER", "NATIVE_BANNER"];
 const BANNER_SIZES = ["468x60", "160x300", "320x50", "300x250", "160x600", "728x90"];
 
 export default function CreateAdPage() {
@@ -18,6 +18,7 @@ export default function CreateAdPage() {
   const [saving, setSaving] = useState(false);
   const [adType, setAdType] = useState("SMARTLINK");
   const [bannerSize, setBannerSize] = useState("728x90");
+  const [gridPosition, setGridPosition] = useState("3");
 
   // Determine recommended placements based on banner size
   const getRecommendedPlacements = () => {
@@ -48,6 +49,7 @@ export default function CreateAdPage() {
     if (adType === "POPUNDER") placement = "GLOBAL_HEAD";
     if (adType === "SOCIAL_BAR") placement = "GLOBAL_BODY";
     if (adType === "SMARTLINK") placement = "VIDEO_BEFORE_PLAYER";
+    if (adType === "NATIVE_BANNER") placement = "HOME_GRID";
 
     const result = await createAdAction({
       name: formData.get("name") as string,
@@ -60,6 +62,7 @@ export default function CreateAdPage() {
       imageUrl: formData.get("imageUrl") as string,
       scriptCode: formData.get("scriptCode") as string,
       bannerSize: adType === "BANNER" ? bannerSize : undefined,
+      gridPosition: adType === "NATIVE_BANNER" ? parseInt(gridPosition, 10) : undefined,
     });
 
     if (result.success) {
@@ -191,6 +194,37 @@ export default function CreateAdPage() {
                       name="scriptCode" 
                       placeholder={`<script type="text/javascript">\n  atOptions = { 'key' : '...', 'format' : 'iframe', 'height' : 90, 'width' : 728, 'params' : {} };\n</script>\n<script type="text/javascript" src="..."></script>`} 
                       rows={8} 
+                      className="font-mono text-xs" 
+                      required 
+                    />
+                  </div>
+                </div>
+              )}
+
+              {adType === "NATIVE_BANNER" && (
+                <div className="grid gap-4">
+                  <div className="bg-yellow-500/10 text-yellow-500 p-3 rounded-md text-sm">
+                    <strong>Native Banner:</strong> Appears directly in the video grid on the homepage (camouflaged among videos).
+                  </div>
+                  
+                  <div className="grid gap-2">
+                    <label className="text-sm font-medium">Grid Position (After X videos)</label>
+                    <Input 
+                      type="number" 
+                      min="1" 
+                      value={gridPosition} 
+                      onChange={(e) => setGridPosition(e.target.value)} 
+                      required 
+                      placeholder="e.g. 3 (Appears after 3rd video)" 
+                    />
+                  </div>
+
+                  <div className="grid gap-2">
+                    <label className="text-sm font-medium">Native Banner Script Code</label>
+                    <Textarea 
+                      name="scriptCode" 
+                      placeholder={`<script async="async" data-cfasync="false" src="..."></script>\n<div id="container-..."></div>`} 
+                      rows={6} 
                       className="font-mono text-xs" 
                       required 
                     />

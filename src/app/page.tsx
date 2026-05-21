@@ -18,8 +18,8 @@ export default async function Home(
   const limit = 16;
   const skip = (page - 1) * limit;
 
-  // Run count and fetch in parallel
-  const [videos, totalCount] = await Promise.all([
+  // Run count, fetch videos, and fetch grid ads in parallel
+  const [videos, totalCount, gridAds] = await Promise.all([
     prisma.video.findMany({
       where: { status: "PUBLISHED", visibility: "PUBLIC" },
       orderBy: { createdAt: "desc" },
@@ -28,6 +28,9 @@ export default async function Home(
     }),
     prisma.video.count({
       where: { status: "PUBLISHED", visibility: "PUBLIC" },
+    }),
+    prisma.ad.findMany({
+      where: { status: "ACTIVE", placement: "HOME_GRID", type: "NATIVE_BANNER" },
     })
   ]);
 
@@ -72,7 +75,7 @@ export default async function Home(
         <div className="mt-4">
           {formattedVideos.length > 0 ? (
             <>
-              <VideoGrid videos={formattedVideos} />
+              <VideoGrid videos={formattedVideos} gridAds={gridAds} />
               <Pagination totalPages={totalPages} />
             </>
           ) : (
