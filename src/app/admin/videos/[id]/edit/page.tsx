@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+// Import EditVideoForm client component explicitly
 import { EditVideoForm } from "./form";
 
 export default async function EditVideoPage({ params }: { params: Promise<{ id: string }> }) {
