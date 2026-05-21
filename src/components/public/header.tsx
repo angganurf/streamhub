@@ -131,13 +131,7 @@ export function Header() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          ) : (
-            <Link href="/auth/login">
-              <button type="button" className="h-8 w-8 rounded-full bg-gray-700 hover:bg-gray-600 flex items-center justify-center transition-colors">
-                <User className="h-5 w-5 text-gray-300" />
-              </button>
-            </Link>
-          )}
+          ) : null}
         </div>
       </div>
 
