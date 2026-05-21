@@ -51,6 +51,8 @@ export default async function VideoDetailPage({ params }: { params: Promise<{ sl
       
       <main className="container mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6">
         <div className="flex-1 min-w-0">
+          <AdBanner placement="VIDEO_BEFORE_PLAYER" />
+          
           {/* Main Video Player */}
           <VideoPlayer 
             videoUrl={video.videoUrl || ""} 

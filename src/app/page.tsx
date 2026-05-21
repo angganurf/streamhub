@@ -2,6 +2,7 @@ import { Header } from "@/components/public/header";
 import { CategoryPills } from "@/components/public/category-pills";
 import { VideoGrid } from "@/components/public/video-grid";
 import { Pagination } from "@/components/public/pagination";
+import { AdBanner } from "@/components/ads/AdBanner";
 import { prisma } from "@/lib/prisma";
 import { Globe } from "lucide-react";
 
@@ -47,6 +48,10 @@ export default async function Home(
     <div className="min-h-screen bg-black text-white font-sans flex flex-col">
       <Header />
       <main className="flex-1 flex flex-col w-full max-w-[1600px] mx-auto">
+        
+        {/* Ad: Home Top */}
+        <AdBanner placement="HOME_TOP" />
+
         {/* Page Title */}
         <div className="flex items-center gap-2 px-4 md:px-6 pt-6 pb-2">
           <h1 className="text-xl font-bold tracking-tight text-white">
@@ -59,6 +64,9 @@ export default async function Home(
         <div className="px-4 md:px-6">
           <CategoryPills />
         </div>
+
+        {/* Ad: Home Middle */}
+        <AdBanner placement="HOME_MIDDLE" />
 
         {/* Video Grid */}
         <div className="mt-4">
@@ -74,6 +82,9 @@ export default async function Home(
             </div>
           )}
         </div>
+
+        {/* Ad: Home Sidebar (placed at bottom since there is no sidebar) */}
+        <AdBanner placement="HOME_SIDEBAR" />
       </main>
     </div>
   );
