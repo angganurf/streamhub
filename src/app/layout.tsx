@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   description: "Discover the best videos on StreamHub",
 };
 
+import { GlobalAdsRenderer } from "@/components/ads/GlobalAdsRenderer";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -22,6 +24,7 @@ export default function RootLayout({
         style={{ fontFamily: "Arial, Helvetica, sans-serif" }}
         suppressHydrationWarning
       >
+        <GlobalAdsRenderer />
         {children}
       </body>
     </html>

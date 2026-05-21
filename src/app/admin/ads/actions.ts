@@ -14,7 +14,9 @@ export async function createAdAction(data: {
   title?: string;
   targetUrl?: string;
   imageKey?: string;
+  imageUrl?: string;
   scriptCode?: string;
+  bannerSize?: string;
 }) {
   try {
     const { publicUrl } = await getR2Config();
@@ -23,15 +25,16 @@ export async function createAdAction(data: {
     const ad = await prisma.ad.create({
       data: {
         name: data.name,
-        type: data.type as "BANNER" | "VIDEO_PREROLL" | "VIDEO_MIDROLL" | "VIDEO_POSTROLL" | "POPUNDER_SCRIPT" | "CUSTOM_SCRIPT",
-        provider: data.provider as "DIRECT" | "ADSTERRA" | "CUSTOM",
-        placement: data.placement as "HOME_TOP" | "HOME_MIDDLE" | "HOME_SIDEBAR" | "VIDEO_BEFORE_PLAYER" | "VIDEO_AFTER_PLAYER" | "VIDEO_SIDEBAR" | "VIDEO_PREROLL" | "GLOBAL_HEAD" | "GLOBAL_BODY" | "POPUNDER",
-        status: data.status as "ACTIVE" | "INACTIVE",
+        type: data.type as Parameters<typeof prisma.ad.create>[0]["data"]["type"],
+        provider: data.provider as Parameters<typeof prisma.ad.create>[0]["data"]["provider"],
+        placement: data.placement as Parameters<typeof prisma.ad.create>[0]["data"]["placement"],
+        status: data.status as Parameters<typeof prisma.ad.create>[0]["data"]["status"],
         title: data.title || null,
         targetUrl: data.targetUrl || null,
         imageKey: data.imageKey || null,
-        imageUrl,
+        imageUrl: data.imageUrl || imageUrl || null,
         scriptCode: data.scriptCode || null,
+        bannerSize: data.bannerSize || null,
       },
     });
 
@@ -54,7 +57,9 @@ export async function updateAdAction(
     title?: string;
     targetUrl?: string;
     imageKey?: string;
+    imageUrl?: string;
     scriptCode?: string;
+    bannerSize?: string;
   }
 ) {
   try {
@@ -67,7 +72,12 @@ export async function updateAdAction(
       title: data.title || null,
       targetUrl: data.targetUrl || null,
       scriptCode: data.scriptCode || null,
+      bannerSize: data.bannerSize || null,
     };
+
+    if (data.imageUrl) {
+      updateData.imageUrl = data.imageUrl;
+    }
 
     if (data.imageKey) {
       const { publicUrl } = await getR2Config();

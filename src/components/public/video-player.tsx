@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { VideoPreRollAd } from "@/components/ads/VideoPreRollAd";
+import { SmartlinkAdOverlay } from "@/components/ads/SmartlinkAdOverlay";
 import { Play, Pause, Volume2, VolumeX, Settings, Loader2 } from "lucide-react";
 
 interface VideoPlayerProps {
@@ -12,7 +12,7 @@ interface VideoPlayerProps {
 
 export function VideoPlayer({ videoUrl, posterUrl, nextVideoUrl }: VideoPlayerProps) {
   const [hasStarted, setHasStarted] = useState(false);
-  const [adFinished, setAdFinished] = useState(false);
+  const [smartlinkDismissed, setSmartlinkDismissed] = useState(false);
 
   // Custom Video Player States
   const [isPlaying, setIsPlaying] = useState(false);
@@ -97,7 +97,7 @@ export function VideoPlayer({ videoUrl, posterUrl, nextVideoUrl }: VideoPlayerPr
         return;
       }
 
-      if (!videoRef.current || !hasStarted || !adFinished) return;
+      if (!videoRef.current || !hasStarted || !smartlinkDismissed) return;
 
       switch (e.key.toLowerCase()) {
         case " ":
@@ -141,7 +141,7 @@ export function VideoPlayer({ videoUrl, posterUrl, nextVideoUrl }: VideoPlayerPr
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [hasStarted, adFinished, duration, isMuted, volume, isTheaterMode, isPlaying]);
+  }, [hasStarted, smartlinkDismissed, duration, isMuted, volume, isTheaterMode, isPlaying]);
 
   // Sync fullscreen change back to state
   useEffect(() => {
@@ -386,8 +386,8 @@ export function VideoPlayer({ videoUrl, posterUrl, nextVideoUrl }: VideoPlayerPr
         isTheaterMode && !isFullscreen ? "rounded-none" : "rounded-xl"
       }`}
     >
-      {!adFinished ? (
-        <VideoPreRollAd posterUrl={posterUrl} onComplete={() => setAdFinished(true)} />
+      {!smartlinkDismissed ? (
+        <SmartlinkAdOverlay posterUrl={posterUrl} onDismiss={() => setSmartlinkDismissed(true)} />
       ) : (
         <>
           {/* Main Video Element */}

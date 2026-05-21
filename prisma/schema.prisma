@@ -167,6 +167,9 @@ enum AdType {
   BANNER
   POPUNDER_SCRIPT
   CUSTOM_SCRIPT
+  SMARTLINK
+  POPUNDER
+  SOCIAL_BAR
 }
 
 enum AdProvider {
@@ -209,6 +212,7 @@ model Ad {
   imageKey     String?
   videoUrl     String?
   videoKey     String?
+  bannerSize   String?
   
   // Script / Popunder
   scriptCode   String?     @db.Text
