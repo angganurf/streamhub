@@ -1,7 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Ad } from "@prisma/client";
+
+interface Ad {
+  id: string;
+  name: string;
+  type: string;
+  placement: string;
+  status: string;
+  title: string | null;
+  targetUrl: string | null;
+  imageUrl: string | null;
+  scriptCode: string | null;
+  bannerSize: string | null;
+}
 
 interface SmartlinkAdOverlayProps {
   onDismiss: () => void;
