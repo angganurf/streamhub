@@ -189,6 +189,7 @@ enum AdPlacement {
   GLOBAL_BODY
   POPUNDER
   HOME_GRID
+  AUTO_DIRECT
 }
 
 enum AdStatus {
@@ -221,6 +222,9 @@ model Ad {
   // Scheduling
   startAt      DateTime?
   endAt        DateTime?
+  
+  // Smartlink Auto Direct
+  autoDirectDelay Int?
   
   // Relations
   videos       Video[]     @relation("AdToVideo")

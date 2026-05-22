@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { createAdAction } from "../actions";
@@ -19,6 +20,7 @@ export default function CreateAdPage() {
   const [adType, setAdType] = useState("SMARTLINK");
   const [bannerSize, setBannerSize] = useState("728x90");
   const [gridPosition, setGridPosition] = useState("3");
+  const [enableAutoDirect, setEnableAutoDirect] = useState(false);
 
   // Determine recommended placements based on banner size
   const getRecommendedPlacements = () => {
@@ -63,6 +65,7 @@ export default function CreateAdPage() {
       scriptCode: formData.get("scriptCode") as string,
       bannerSize: adType === "BANNER" ? bannerSize : undefined,
       gridPosition: adType === "NATIVE_BANNER" ? parseInt(gridPosition, 10) : undefined,
+      autoDirectDelay: enableAutoDirect && formData.get("autoDirectDelay") ? parseInt(formData.get("autoDirectDelay") as string, 10) : undefined,
     });
 
     if (result.success) {
@@ -123,7 +126,7 @@ export default function CreateAdPage() {
               {adType === "SMARTLINK" && (
                 <div className="grid gap-4">
                   <div className="bg-blue-500/10 text-blue-500 p-3 rounded-md text-sm">
-                    <strong>Smartlink:</strong> A clickable image overlay that appears over the video player before the video starts. When clicked, it opens the Direct Link in a new tab.
+                    <strong>Smartlink:</strong> A clickable image overlay that appears over the video player before the video starts. You can optionally enable Auto Redirect.
                   </div>
                   <div className="grid gap-2">
                     <label className="text-sm font-medium">Direct Link URL</label>
@@ -133,6 +136,19 @@ export default function CreateAdPage() {
                     <label className="text-sm font-medium">Overlay Image URL</label>
                     <Input name="imageUrl" placeholder="https://example.com/image.jpg (Displayed on video player)" required />
                   </div>
+                  <div className="flex items-center gap-2 border-t pt-4">
+                    <Switch
+                      checked={enableAutoDirect}
+                      onCheckedChange={setEnableAutoDirect}
+                    />
+                    <label className="text-sm font-medium">Enable Auto Redirect</label>
+                  </div>
+                  {enableAutoDirect && (
+                    <div className="grid gap-2">
+                      <label className="text-sm font-medium">Auto Redirect Delay (seconds)</label>
+                      <Input type="number" name="autoDirectDelay" placeholder="0 for immediate" required min="0" />
+                    </div>
+                  )}
                 </div>
               )}
 

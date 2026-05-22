@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Header } from "@/components/public/header";
 import { VideoPlayer } from "@/components/public/video-player";
 import { AdBanner } from "@/components/ads/AdBanner";
+import { AutoRedirectAd } from "@/components/ads/AutoRedirectAd";
 import { Button } from "@/components/ui/button";
 import { ThumbsUp, ThumbsDown, Plus, Flag } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -45,9 +46,22 @@ export default async function VideoDetailPage({ params }: { params: Promise<{ sl
     orderBy: { views: "desc" },
   });
 
+  // Fetch SMARTLINK ad for auto direct
+  const autoDirectAd = await prisma.ad.findFirst({
+    where: {
+      status: "ACTIVE",
+      type: "SMARTLINK",
+      placement: "VIDEO_BEFORE_PLAYER",
+      autoDirectDelay: { not: null }
+    },
+  });
+
   return (
     <>
       <Header />
+      {autoDirectAd && autoDirectAd.targetUrl && (
+        <AutoRedirectAd targetUrl={autoDirectAd.targetUrl} delaySeconds={autoDirectAd.autoDirectDelay || 0} />
+      )}
       
       <main className="container mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6">
         <div className="flex-1 min-w-0">

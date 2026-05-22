@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { updateAdAction } from "../../actions";
@@ -26,6 +27,7 @@ interface Ad {
   scriptCode: string | null;
   bannerSize: string | null;
   gridPosition: number | null;
+  autoDirectDelay: number | null;
 }
 
 export function EditAdForm({ ad }: { ad: Ad }) {
@@ -34,6 +36,7 @@ export function EditAdForm({ ad }: { ad: Ad }) {
   const [adType, setAdType] = useState(AD_TYPES.includes(ad.type) ? ad.type : "SMARTLINK");
   const [bannerSize, setBannerSize] = useState(ad.bannerSize || "728x90");
   const [gridPosition, setGridPosition] = useState(ad.gridPosition?.toString() || "3");
+  const [enableAutoDirect, setEnableAutoDirect] = useState(ad.autoDirectDelay !== null);
 
   const getRecommendedPlacements = () => {
     switch (bannerSize) {
@@ -76,6 +79,7 @@ export function EditAdForm({ ad }: { ad: Ad }) {
       scriptCode: formData.get("scriptCode") as string,
       bannerSize: adType === "BANNER" ? bannerSize : undefined,
       gridPosition: adType === "NATIVE_BANNER" ? parseInt(gridPosition, 10) : undefined,
+      autoDirectDelay: enableAutoDirect && formData.get("autoDirectDelay") ? parseInt(formData.get("autoDirectDelay") as string, 10) : undefined,
     });
 
     if (result.success) {
@@ -128,7 +132,7 @@ export function EditAdForm({ ad }: { ad: Ad }) {
             {adType === "SMARTLINK" && (
               <div className="grid gap-4">
                 <div className="bg-blue-500/10 text-blue-500 p-3 rounded-md text-sm">
-                  <strong>Smartlink:</strong> Clickable image overlay over the video player.
+                  <strong>Smartlink:</strong> Clickable image overlay over the video player. You can optionally enable Auto Redirect.
                 </div>
                 <div className="grid gap-2">
                   <label className="text-sm font-medium">Direct Link URL</label>
@@ -138,6 +142,19 @@ export function EditAdForm({ ad }: { ad: Ad }) {
                   <label className="text-sm font-medium">Overlay Image URL</label>
                   <Input name="imageUrl" defaultValue={ad.imageUrl || ""} placeholder="https://..." required />
                 </div>
+                <div className="flex items-center gap-2 border-t pt-4">
+                  <Switch
+                    checked={enableAutoDirect}
+                    onCheckedChange={setEnableAutoDirect}
+                  />
+                  <label className="text-sm font-medium">Enable Auto Redirect</label>
+                </div>
+                {enableAutoDirect && (
+                  <div className="grid gap-2">
+                    <label className="text-sm font-medium">Auto Redirect Delay (seconds)</label>
+                    <Input type="number" name="autoDirectDelay" defaultValue={ad.autoDirectDelay?.toString() || ""} placeholder="0 for immediate" required min="0" />
+                  </div>
+                )}
               </div>
             )}
 
